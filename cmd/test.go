@@ -22,11 +22,12 @@ import (
 	"log"
 
 	"github.com/ghodss/yaml"
+	"github.com/open-policy-agent/opa/rego"
 	"github.com/spf13/cobra"
 )
 
 var files string
-var rego string
+var regoFiles string
 
 // testCmd represents the test command
 var testCmd = &cobra.Command{
@@ -65,9 +66,9 @@ var testCmd = &cobra.Command{
 
 		r := rego.New(
 			rego.Query("data.main.deny"),
-			rego.Load(regoPath, nil))
+			rego.Load([]string{regoPath}, nil))
 
-		query, err := r.PrepareforEval(ctx)
+		query, err := r.PrepareForEval(ctx)
 		if err != nil {
 			log.Fatal(err)
 		}
@@ -87,7 +88,7 @@ func init() {
 	testCmd.PersistentFlags().StringVarP(&files, "files", "f", "", "location to config files to be tested")
 	testCmd.MarkPersistentFlagRequired("files")
 
-	testCmd.PersistentFlags().StringVarP(&rego, "rego", "r", "", "location to rego files")
+	testCmd.PersistentFlags().StringVarP(&regoFiles, "rego", "r", "", "location to rego files")
 	testCmd.MarkPersistentFlagRequired("rego")
 
 	// Here you will define your flags and configuration settings.
