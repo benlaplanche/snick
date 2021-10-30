@@ -33,6 +33,8 @@ var testCmd = &cobra.Command{
 
 func init() {
 	rootCmd.AddCommand(testCmd)
+	testCmd.PersistentFlags().String("files", "", "location to config files to be tested")
+	testCmd.MarkPersistentFlagRequired("files")
 
 	// Here you will define your flags and configuration settings.
 
