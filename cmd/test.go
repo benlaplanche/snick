@@ -16,10 +16,17 @@ limitations under the License.
 package cmd
 
 import (
+	"context"
 	"fmt"
+	"io/ioutil"
+	"log"
 
+	"github.com/ghodss/yaml"
 	"github.com/spf13/cobra"
 )
+
+var files string
+var rego string
 
 // testCmd represents the test command
 var testCmd = &cobra.Command{
@@ -28,13 +35,60 @@ var testCmd = &cobra.Command{
 	Long:  ``,
 	Run: func(cmd *cobra.Command, args []string) {
 		fmt.Println("test called")
+
+		filesPath, _ := cmd.Flags().GetString("files")
+
+		if filesPath != "" {
+			fmt.Println("file path is ", filesPath)
+		}
+
+		regoPath, _ := cmd.Flags().GetString("rego")
+		if regoPath != "" {
+			fmt.Println("rego path is ", regoPath)
+		}
+
+		content, err := ioutil.ReadFile(filesPath)
+		if err != nil {
+			log.Fatal(err)
+		}
+
+		fmt.Println(string(content))
+
+		json, err := yaml.YAMLToJSON(content)
+		if err != nil {
+			log.Fatal(err)
+		}
+
+		fmt.Println(string(json))
+
+		ctx := context.Background()
+
+		r := rego.New(
+			rego.Query("data.main.deny"),
+			rego.Load(regoPath, nil))
+
+		query, err := r.PrepareforEval(ctx)
+		if err != nil {
+			log.Fatal(err)
+		}
+
+		rs, err := query.Eval(ctx, rego.EvalInput(json))
+		if err != nil {
+			log.Fatal(err)
+		}
+
+		fmt.Println(rs)
+
 	},
 }
 
 func init() {
 	rootCmd.AddCommand(testCmd)
-	testCmd.PersistentFlags().String("files", "", "location to config files to be tested")
+	testCmd.PersistentFlags().StringVarP(&files, "files", "f", "", "location to config files to be tested")
 	testCmd.MarkPersistentFlagRequired("files")
+
+	testCmd.PersistentFlags().StringVarP(&rego, "rego", "r", "", "location to rego files")
+	testCmd.MarkPersistentFlagRequired("rego")
 
 	// Here you will define your flags and configuration settings.
 
