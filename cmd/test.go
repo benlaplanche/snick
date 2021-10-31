@@ -32,6 +32,7 @@ var files string
 var regoFiles string
 var debug bool
 var j interface{}
+var output []Result
 
 type Result struct {
 	id       string
@@ -92,13 +93,14 @@ var testCmd = &cobra.Command{
 			log.Fatal(err)
 		}
 
-		tableOutput(rs)
+		output := prepareOutput(rs)
+		tableOutput(output)
 
 	},
 }
 
-func tableOutput(rs rego.ResultSet) {
-	var output []Result
+func prepareOutput(rs rego.ResultSet) []Result {
+
 	for _, result := range rs {
 		for _, expression := range result.Expressions {
 
@@ -151,7 +153,10 @@ func tableOutput(rs rego.ResultSet) {
 			}
 		}
 	}
+	return output
+}
 
+func tableOutput(output []Result) {
 	headerFmt := color.New(color.FgGreen, color.Underline).SprintfFunc()
 	columnFmt := color.New(color.FgYellow).SprintfFunc()
 
