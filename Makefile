@@ -7,6 +7,8 @@ build:
 run:
 	go run main.go
 
+a:
+	bin/snick test --files examples/hello/hello.yaml --rego examples/hello/hello.rego
 
 compile:
 	echo "Compiling for every OS and Platform"

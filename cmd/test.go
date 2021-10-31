@@ -38,7 +38,6 @@ var testCmd = &cobra.Command{
 		fmt.Println("test called")
 
 		filesPath, _ := cmd.Flags().GetString("files")
-
 		if filesPath != "" {
 			fmt.Println("file path is ", filesPath)
 		}
@@ -60,12 +59,19 @@ var testCmd = &cobra.Command{
 			log.Fatal(err)
 		}
 
+		var j interface{}
+		err = yaml.Unmarshal(content, &j)
+		if err != nil {
+			log.Fatal(err)
+		}
+
+		fmt.Println(json)
 		fmt.Println(string(json))
 
 		ctx := context.Background()
 
 		r := rego.New(
-			rego.Query("data.main.deny"),
+			rego.Query("data.main"),
 			rego.Load([]string{regoPath}, nil))
 
 		query, err := r.PrepareForEval(ctx)
@@ -73,7 +79,7 @@ var testCmd = &cobra.Command{
 			log.Fatal(err)
 		}
 
-		rs, err := query.Eval(ctx, rego.EvalInput(json))
+		rs, err := query.Eval(ctx, rego.EvalInput(j))
 		if err != nil {
 			log.Fatal(err)
 		}
