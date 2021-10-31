@@ -31,6 +31,14 @@ var regoFiles string
 var debug bool
 var j interface{}
 
+type Result struct {
+	id       string
+	name     string
+	severity string
+	response string
+	status   string
+}
+
 // testCmd represents the test command
 var testCmd = &cobra.Command{
 	Use:   "test",
@@ -88,60 +96,63 @@ var testCmd = &cobra.Command{
 }
 
 func prettyOutput(rs rego.ResultSet) {
-	// top := rs[0].Expressions
-	// fmt.Println(reflect.TypeOf(top).Kind())
-	// val := top[0].Value
-	// fmt.Println(reflect.TypeOf(val).Kind())
-
+	var output []Result
 	for _, result := range rs {
-		// fmt.Println(result)
 		for _, expression := range result.Expressions {
-			fmt.Println(expression.Value)
-			// fmt.Println(expression.Value.(map[string]interface{}))
-			fmt.Println("\n")
-			// Rego rules that are intended for evaluation should return a slice of values.
-			// For example, deny[msg] or violation[{"msg": msg}].
-			//
-			// When an expression does not have a slice of values, the expression did not
-			// evaluate to true, and no message was returned.
+
 			var expressionValues map[string]interface{}
 			if _, ok := expression.Value.(map[string]interface{}); ok {
 				expressionValues = expression.Value.(map[string]interface{})
 			}
-			// fmt.Println(expressionValues...)
+
 			if len(expressionValues) == 0 {
 				// results = append(results, output.Result{})
-				// fmt.Println("blah")
 				continue
 			}
 
 			for _, v := range expressionValues {
-				fmt.Println(v)
-				switch val := v.(type) {
 
-				// Policies that only return a single string (e.g. deny[msg])
-				case string:
-					// result := output.Result{
-					// 	Message: val,
-					// }
-					// results = append(results, result)
-					fmt.Println(v)
-					fmt.Println(val)
+				var nestedValues []interface{}
+				if _, ok := v.([]interface{}); ok {
+					nestedValues = v.([]interface{})
+				}
 
-				// Policies that return metadata (e.g. deny[{"msg": msg}])
-				case map[string]interface{}:
-					// result, err := output.NewResult(val)
-					// if err != nil {
-					// return output.QueryResult{}, fmt.Errorf("new result: %w", err)
-					// fmt.Println("error")
-					// }
+				for _, x := range nestedValues {
 
-					// results = append(results, result)
-					fmt.Println(v)
+					switch val := x.(type) {
+					// Policies that only return a single string (e.g. deny[msg])
+					case string:
+						// result := output.Result{
+						// 	Message: val,
+						// }
+						// results = append(results, result)
+						// fmt.Println("string")
+						fmt.Println(val)
+
+					// Policies that return metadata (e.g. deny[{"msg": msg}])
+					case map[string]interface{}:
+						var rx string
+						if val["status"].(string) == "allow" {
+							rx = val["allow_response"].(string)
+						} else {
+							rx = val["deny_response"].(string)
+						}
+
+						result := Result{
+							id:       val["id"].(string),
+							status:   val["status"].(string),
+							name:     val["name"].(string),
+							response: rx,
+							severity: val["severity"].(string),
+						}
+						output = append(output, result)
+					}
 				}
 			}
 		}
 	}
+
+	fmt.Println(output)
 
 	// headerFmt := color.New(color.FgGreen, color.Underline).SprintfFunc()
 	// columnFmt := color.New(color.FgYellow).SprintfFunc()
