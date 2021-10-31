@@ -152,8 +152,6 @@ func tableOutput(rs rego.ResultSet) {
 		}
 	}
 
-	fmt.Println(output)
-
 	headerFmt := color.New(color.FgGreen, color.Underline).SprintfFunc()
 	columnFmt := color.New(color.FgYellow).SprintfFunc()
 
