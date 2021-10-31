@@ -92,12 +92,12 @@ var testCmd = &cobra.Command{
 			log.Fatal(err)
 		}
 
-		prettyOutput(rs)
+		tableOutput(rs)
 
 	},
 }
 
-func prettyOutput(rs rego.ResultSet) {
+func tableOutput(rs rego.ResultSet) {
 	var output []Result
 	for _, result := range rs {
 		for _, expression := range result.Expressions {
