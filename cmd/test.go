@@ -21,8 +21,10 @@ import (
 	"io/ioutil"
 	"log"
 
+	"github.com/fatih/color"
 	"github.com/ghodss/yaml"
 	"github.com/open-policy-agent/opa/rego"
+	"github.com/rodaine/table"
 	"github.com/spf13/cobra"
 )
 
@@ -154,17 +156,17 @@ func prettyOutput(rs rego.ResultSet) {
 
 	fmt.Println(output)
 
-	// headerFmt := color.New(color.FgGreen, color.Underline).SprintfFunc()
-	// columnFmt := color.New(color.FgYellow).SprintfFunc()
+	headerFmt := color.New(color.FgGreen, color.Underline).SprintfFunc()
+	columnFmt := color.New(color.FgYellow).SprintfFunc()
 
-	// tbl := table.New("Status", "ID", "Name", "Severity", "Response")
-	// tbl.WithHeaderFormatter(headerFmt).WithFirstColumnFormatter(columnFmt)
+	tbl := table.New("Status", "ID", "Name", "Severity", "Response")
+	tbl.WithHeaderFormatter(headerFmt).WithFirstColumnFormatter(columnFmt)
 
-	// for _, r := range allow {
-	// 	tbl.AddRow(r.status, r.id, r.name, r.severity, r.allow_response)
-	// }
+	for _, r := range output {
+		tbl.AddRow(r.status, r.id, r.name, r.severity, r.response)
+	}
 
-	// tbl.Print()
+	tbl.Print()
 }
 
 func init() {
