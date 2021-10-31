@@ -1,14 +1,30 @@
 package main
 
-deny[msg] {
-	i := input[_].hello
+check(v) {
+	v == "world"
+}
 
-	not i == "world"
-	msg := sprintf("input message '%s' failed", [i])
+response(v, status) = message {
+	message = {
+		"id": "CUSTOM-123",
+		"name": "Does hello equal world",
+		"severity": "critical",
+		"allow_response": sprintf("'hello' correctly equals '%s'", [v]),
+		"deny_response": sprintf("'hello' contains '%s' instead of expected 'world'", [v]),
+		"value": v,
+		"key": "hello",
+		"status": status,
+	}
+}
+
+deny[msg] {
+	v := input[_].hello
+	not check(v)
+	msg := response(v, "deny")
 }
 
 allow[msg] {
-	i := input[_].hello
-	i == "world"
-	msg := sprintf("input message '%s' passed", [i])
+	v := input[_].hello
+	check(v)
+	msg := response(v, "allow")
 }
