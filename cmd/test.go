@@ -108,7 +108,7 @@ func prettyOutput(rs rego.ResultSet) {
 			}
 
 			if len(expressionValues) == 0 {
-				// results = append(results, output.Result{})
+				output = append(output, Result{})
 				continue
 			}
 
@@ -127,9 +127,7 @@ func prettyOutput(rs rego.ResultSet) {
 						// result := output.Result{
 						// 	Message: val,
 						// }
-						// results = append(results, result)
-						// fmt.Println("string")
-						fmt.Println(val)
+						// output = append(output, result)
 
 					// Policies that return metadata (e.g. deny[{"msg": msg}])
 					case map[string]interface{}:
@@ -178,14 +176,4 @@ func init() {
 	testCmd.MarkPersistentFlagRequired("rego")
 
 	testCmd.PersistentFlags().BoolVarP(&debug, "debug", "d", false, "enable debug mode")
-
-	// Here you will define your flags and configuration settings.
-
-	// Cobra supports Persistent Flags which will work for this command
-	// and all subcommands, e.g.:
-	// testCmd.PersistentFlags().String("foo", "", "A help for foo")
-
-	// Cobra supports local flags which will only run when this command
-	// is called directly, e.g.:
-	// testCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
 }
