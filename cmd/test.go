@@ -28,6 +28,8 @@ import (
 
 var files string
 var regoFiles string
+var debug bool
+var j interface{}
 
 // testCmd represents the test command
 var testCmd = &cobra.Command{
@@ -35,38 +37,34 @@ var testCmd = &cobra.Command{
 	Short: "evaluate config files against policies",
 	Long:  ``,
 	Run: func(cmd *cobra.Command, args []string) {
-		fmt.Println("test called")
 
+		// setup
 		filesPath, _ := cmd.Flags().GetString("files")
-		if filesPath != "" {
-			fmt.Println("file path is ", filesPath)
-		}
-
 		regoPath, _ := cmd.Flags().GetString("rego")
-		if regoPath != "" {
-			fmt.Println("rego path is ", regoPath)
-		}
+		debug, _ := cmd.Flags().GetBool("debug")
 
 		content, err := ioutil.ReadFile(filesPath)
 		if err != nil {
 			log.Fatal(err)
 		}
 
-		fmt.Println(string(content))
+		if debug {
+			fmt.Println("file path:", filesPath)
+			fmt.Println("rego path:", regoPath)
+			fmt.Println("file contents:", string(content))
 
-		json, err := yaml.YAMLToJSON(content)
-		if err != nil {
-			log.Fatal(err)
+			json, err := yaml.YAMLToJSON(content)
+			if err != nil {
+				log.Fatal(err)
+			}
+
+			fmt.Println("json:", string(json))
 		}
 
-		var j interface{}
 		err = yaml.Unmarshal(content, &j)
 		if err != nil {
 			log.Fatal(err)
 		}
-
-		fmt.Println(json)
-		fmt.Println(string(json))
 
 		ctx := context.Background()
 
@@ -96,6 +94,8 @@ func init() {
 
 	testCmd.PersistentFlags().StringVarP(&regoFiles, "rego", "r", "", "location to rego files")
 	testCmd.MarkPersistentFlagRequired("rego")
+
+	testCmd.PersistentFlags().BoolVarP(&debug, "debug", "d", false, "enable debug mode")
 
 	// Here you will define your flags and configuration settings.
 
