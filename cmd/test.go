@@ -82,9 +82,78 @@ var testCmd = &cobra.Command{
 			log.Fatal(err)
 		}
 
-		fmt.Println(rs)
+		prettyOutput(rs)
 
 	},
+}
+
+func prettyOutput(rs rego.ResultSet) {
+	// top := rs[0].Expressions
+	// fmt.Println(reflect.TypeOf(top).Kind())
+	// val := top[0].Value
+	// fmt.Println(reflect.TypeOf(val).Kind())
+
+	for _, result := range rs {
+		// fmt.Println(result)
+		for _, expression := range result.Expressions {
+			fmt.Println(expression.Value)
+			// fmt.Println(expression.Value.(map[string]interface{}))
+			fmt.Println("\n")
+			// Rego rules that are intended for evaluation should return a slice of values.
+			// For example, deny[msg] or violation[{"msg": msg}].
+			//
+			// When an expression does not have a slice of values, the expression did not
+			// evaluate to true, and no message was returned.
+			var expressionValues map[string]interface{}
+			if _, ok := expression.Value.(map[string]interface{}); ok {
+				expressionValues = expression.Value.(map[string]interface{})
+			}
+			// fmt.Println(expressionValues...)
+			if len(expressionValues) == 0 {
+				// results = append(results, output.Result{})
+				// fmt.Println("blah")
+				continue
+			}
+
+			for _, v := range expressionValues {
+				fmt.Println(v)
+				switch val := v.(type) {
+
+				// Policies that only return a single string (e.g. deny[msg])
+				case string:
+					// result := output.Result{
+					// 	Message: val,
+					// }
+					// results = append(results, result)
+					fmt.Println(v)
+					fmt.Println(val)
+
+				// Policies that return metadata (e.g. deny[{"msg": msg}])
+				case map[string]interface{}:
+					// result, err := output.NewResult(val)
+					// if err != nil {
+					// return output.QueryResult{}, fmt.Errorf("new result: %w", err)
+					// fmt.Println("error")
+					// }
+
+					// results = append(results, result)
+					fmt.Println(v)
+				}
+			}
+		}
+	}
+
+	// headerFmt := color.New(color.FgGreen, color.Underline).SprintfFunc()
+	// columnFmt := color.New(color.FgYellow).SprintfFunc()
+
+	// tbl := table.New("Status", "ID", "Name", "Severity", "Response")
+	// tbl.WithHeaderFormatter(headerFmt).WithFirstColumnFormatter(columnFmt)
+
+	// for _, r := range allow {
+	// 	tbl.AddRow(r.status, r.id, r.name, r.severity, r.allow_response)
+	// }
+
+	// tbl.Print()
 }
 
 func init() {

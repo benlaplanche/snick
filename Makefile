@@ -10,6 +10,9 @@ run:
 a:
 	@bin/snick test --files examples/hello/hello.yaml --rego examples/hello/hello.rego
 
+b: 
+	@go run main.go test --files examples/hello/hello.yaml --rego examples/hello/hello.rego
+
 d:
 	bin/snick test --files examples/hello/hello.yaml --rego examples/hello/hello.rego -d
 
