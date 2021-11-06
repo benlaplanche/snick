@@ -17,12 +17,14 @@ package cmd
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"io/ioutil"
 	"log"
 
 	"github.com/fatih/color"
 	"github.com/ghodss/yaml"
+	"github.com/jmespath/go-jmespath"
 	"github.com/open-policy-agent/opa/rego"
 	"github.com/rodaine/table"
 	"github.com/spf13/cobra"
@@ -33,13 +35,14 @@ var regoFiles string
 var debug bool
 var j interface{}
 var output []Result
+var filter string
 
 type Result struct {
-	id       string
-	name     string
-	severity string
-	response string
-	status   string
+	id       string `json:"id"`
+	name     string `json:"name"`
+	severity string `json:"severity"`
+	response string `json:"response"`
+	status   string `json:"status"`
 }
 
 // testCmd represents the test command
@@ -53,6 +56,7 @@ var testCmd = &cobra.Command{
 		filesPath, _ := cmd.Flags().GetString("files")
 		regoPath, _ := cmd.Flags().GetString("rego")
 		debug, _ := cmd.Flags().GetBool("debug")
+		filter, _ := cmd.Flags().GetString("filter")
 
 		content, err := ioutil.ReadFile(filesPath)
 		if err != nil {
@@ -63,6 +67,7 @@ var testCmd = &cobra.Command{
 			fmt.Println("file path:", filesPath)
 			fmt.Println("rego path:", regoPath)
 			fmt.Println("file contents:", string(content))
+			fmt.Println("filter:", filter)
 
 			json, err := yaml.YAMLToJSON(content)
 			if err != nil {
@@ -94,6 +99,22 @@ var testCmd = &cobra.Command{
 		}
 
 		output := prepareOutput(rs)
+
+		if filter != "" {
+			data, err := json.Marshal(&output)
+			fmt.Println(string(data))
+
+			if err != nil {
+				fmt.Println("error marshaling to json")
+			}
+
+			blah, err := jmespath.Search(filter, data)
+			fmt.Println(string(data))
+			fmt.Println(blah)
+			if err != nil {
+				fmt.Println("error using th filter")
+			}
+		}
 		tableOutput(output)
 
 	},
@@ -177,6 +198,8 @@ func init() {
 
 	testCmd.PersistentFlags().StringVarP(&regoFiles, "rego", "r", "", "location to rego files")
 	testCmd.MarkPersistentFlagRequired("rego")
+
+	testCmd.PersistentFlags().StringVarP(&filter, "filter", "", "", "filter the results")
 
 	testCmd.PersistentFlags().BoolVarP(&debug, "debug", "d", false, "enable debug mode")
 }

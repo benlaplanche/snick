@@ -5,6 +5,7 @@ go 1.17
 require (
 	github.com/fatih/color v1.9.0
 	github.com/ghodss/yaml v1.0.0
+	github.com/jmespath/go-jmespath v0.4.0
 	github.com/mitchellh/go-homedir v1.1.0
 	github.com/open-policy-agent/opa v0.34.0
 	github.com/rodaine/table v1.0.1
