@@ -22,6 +22,7 @@ import (
 	"io/ioutil"
 	"log"
 
+	"github.com/benlaplanche/snick/environment"
 	"github.com/fatih/color"
 	"github.com/ghodss/yaml"
 	"github.com/jmespath/go-jmespath"
@@ -76,6 +77,8 @@ var testCmd = &cobra.Command{
 
 			fmt.Println("json:", string(json))
 		}
+
+		fmt.Printf("Environment detected as: %s \n", environment.DetectENV())
 
 		err = yaml.Unmarshal(content, &j)
 		if err != nil {
