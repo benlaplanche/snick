@@ -46,18 +46,20 @@ type Result struct {
 }
 
 type appEnv struct {
-	timestamp time.Time
-	debug     bool
-	rules     string
-	output    string
-	files     string
-	results   []Result
+	timestamp   time.Time
+	debug       bool
+	rules       string
+	output      string
+	files       string
+	results     []Result
+	environment string
 }
 
 func (app *appEnv) setup(cmd *cobra.Command) error {
 	app.files, _ = cmd.Flags().GetString("files")
 	app.rules, _ = cmd.Flags().GetString("rego")
 	app.debug, _ = cmd.Flags().GetBool("debug")
+	app.environment = environment.DetectENV()
 	return nil
 }
 
@@ -69,11 +71,6 @@ var testCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 
 		var app appEnv
-		// setup
-		// filesPath, _ := cmd.Flags().GetString("files")
-		// regoPath, _ := cmd.Flags().GetString("rego")
-		// debug, _ := cmd.Flags().GetBool("debug")
-		// filter, _ := cmd.Flags().GetString("filter")
 
 		err := app.setup(cmd)
 		if err != nil {
@@ -98,7 +95,7 @@ var testCmd = &cobra.Command{
 			fmt.Println("json:", string(json))
 		}
 
-		fmt.Printf("Environment detected as: %s \n", environment.DetectENV())
+		fmt.Printf("Environment detected as: %s \n", app.environment)
 
 		err = yaml.Unmarshal(content, &j)
 		if err != nil {
