@@ -1,4 +1,4 @@
-package main_test
+package environment_test
 
 import (
 	"testing"
@@ -7,7 +7,7 @@ import (
 	. "github.com/onsi/gomega"
 )
 
-func TestSnick(t *testing.T) {
+func TestEnvironment(t *testing.T) {
 	RegisterFailHandler(Fail)
-	RunSpecs(t, "Snick Suite")
+	RunSpecs(t, "Environment Suite")
 }
