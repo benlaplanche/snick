@@ -27,4 +27,11 @@ var _ = Describe("Environment", func() {
 		})
 	})
 
+	Context("It is local development", func() {
+		It("should say local", func() {
+			result := DetectENV()
+			Expect(result).To(Equal("local"))
+		})
+	})
+
 })
