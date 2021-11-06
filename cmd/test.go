@@ -17,15 +17,14 @@ package cmd
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
 	"io/ioutil"
 	"log"
+	"time"
 
 	"github.com/benlaplanche/snick/environment"
 	"github.com/fatih/color"
 	"github.com/ghodss/yaml"
-	"github.com/jmespath/go-jmespath"
 	"github.com/open-policy-agent/opa/rego"
 	"github.com/rodaine/table"
 	"github.com/spf13/cobra"
@@ -46,6 +45,22 @@ type Result struct {
 	status   string `json:"status"`
 }
 
+type appEnv struct {
+	timestamp time.Time
+	debug     bool
+	rules     string
+	output    string
+	files     string
+	results   []Result
+}
+
+func (app *appEnv) setup(cmd *cobra.Command) error {
+	app.files, _ = cmd.Flags().GetString("files")
+	app.rules, _ = cmd.Flags().GetString("rego")
+	app.debug, _ = cmd.Flags().GetBool("debug")
+	return nil
+}
+
 // testCmd represents the test command
 var testCmd = &cobra.Command{
 	Use:   "test",
@@ -53,22 +68,27 @@ var testCmd = &cobra.Command{
 	Long:  ``,
 	Run: func(cmd *cobra.Command, args []string) {
 
+		var app appEnv
 		// setup
-		filesPath, _ := cmd.Flags().GetString("files")
-		regoPath, _ := cmd.Flags().GetString("rego")
-		debug, _ := cmd.Flags().GetBool("debug")
-		filter, _ := cmd.Flags().GetString("filter")
+		// filesPath, _ := cmd.Flags().GetString("files")
+		// regoPath, _ := cmd.Flags().GetString("rego")
+		// debug, _ := cmd.Flags().GetBool("debug")
+		// filter, _ := cmd.Flags().GetString("filter")
 
-		content, err := ioutil.ReadFile(filesPath)
+		err := app.setup(cmd)
 		if err != nil {
 			log.Fatal(err)
 		}
 
-		if debug {
-			fmt.Println("file path:", filesPath)
-			fmt.Println("rego path:", regoPath)
+		content, err := ioutil.ReadFile(app.files)
+		if err != nil {
+			log.Fatal(err)
+		}
+
+		if app.debug {
+			fmt.Println("file path:", app.files)
+			fmt.Println("rego path:", app.rules)
 			fmt.Println("file contents:", string(content))
-			fmt.Println("filter:", filter)
 
 			json, err := yaml.YAMLToJSON(content)
 			if err != nil {
@@ -89,7 +109,7 @@ var testCmd = &cobra.Command{
 
 		r := rego.New(
 			rego.Query("data.main"),
-			rego.Load([]string{regoPath}, nil))
+			rego.Load([]string{app.rules}, nil))
 
 		query, err := r.PrepareForEval(ctx)
 		if err != nil {
@@ -102,22 +122,6 @@ var testCmd = &cobra.Command{
 		}
 
 		output := prepareOutput(rs)
-
-		if filter != "" {
-			data, err := json.Marshal(&output)
-			fmt.Println(string(data))
-
-			if err != nil {
-				fmt.Println("error marshaling to json")
-			}
-
-			blah, err := jmespath.Search(filter, data)
-			fmt.Println(string(data))
-			fmt.Println(blah)
-			if err != nil {
-				fmt.Println("error using th filter")
-			}
-		}
 		tableOutput(output)
 
 	},
