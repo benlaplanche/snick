@@ -6,9 +6,9 @@ func DetectENV() (response string) {
 
 	switch {
 	case os.Getenv("GITHUB_ACTIONS") != "":
-		response = "GitHub Actions"
+		response = "gh-actions"
 	default:
-		response = "Local Development"
+		response = "local"
 	}
 
 	return

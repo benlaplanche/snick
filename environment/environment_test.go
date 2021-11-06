@@ -23,7 +23,7 @@ var _ = Describe("Environment", func() {
 
 		It("should say github actions", func() {
 			result := DetectENV()
-			Expect(result).To(Equal("GitHub Actions"))
+			Expect(result).To(Equal("gh-actions"))
 		})
 	})
 
